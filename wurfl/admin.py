@@ -138,7 +138,7 @@ class UpdateAdmin(admin.ModelAdmin):
         return urlpatterns + super(UpdateAdmin, self).get_urls()
     
 class PatchAdmin(admin.ModelAdmin):
-    ist_display = ('name', 'priority', 'updated', 'created', 'active')
+    list_display = ('name', 'priority', 'updated', 'created', 'active')
     list_filter = ('active', 'priority',)
     search_fields = ('name',)
 
