@@ -1,18 +1,17 @@
-<html>
-<head/>
-<body>
+{% extends "admin/wurfl/base.html" %}
+{% load i18n %}
 
-<h1>WURFL test page</h1>
+{% block content %}
 
 {% if device %}
-    <p>Device
+    <p>{% trans "Device" %}
         <ul>
-            <li>Matching User agent : {{ device.user_agent }}</li>
-            <li>Device ID : {{ device.id }}</li>
-            <li>Capabilities :
+            <li>{% trans "Matching User agent" %} : {{ device.user_agent }}</li>
+            <li>{% trans "Device ID" %} : {{ device.id }}</li>
+            <li>{% trans "Capabilities" %} :
                 <ul>
                     {% for group, capabilities in device.capabilities.items %}
-                        <li>Group {{ group }} :
+                        <li>{% trans "Group" %} {{ group }} :
                             <ul>
                                 {% for name, value in capabilities.items %}
                                     <li>{{ name }} : {{value }}</li>
@@ -25,8 +24,7 @@
         </ul>
     </p>
 {% else %}
-    <p>No device detected (did you forget to add `wurfl.context_processors.device` to your `TEMPLATE_CONTEXT_PROCESSORS` settings?)</p>
+    <p>{% trans "No device detected (did you forget to add `wurfl.context_processors.device` to your `TEMPLATE_CONTEXT_PROCESSORS` settings?)" %}</p>
 {% endif %}
 
-</body>
-</html>
+{% endblock %}

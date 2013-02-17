@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.encoding import force_unicode
 from django.utils import simplejson
+
 from wurfl.conf import settings
 from wurfl.exceptions import NoMatch
 from wurfl.utils import FieldSubscript, pretty_duration
@@ -109,7 +110,7 @@ class BaseDevice(models.Model):
             device = cache.get(cache_key)
             if device:
                 return device
-        
+
         # fallback to actual computation
         device = cls._match_user_agent(user_agent)    
         device._build_full_capabilities()
@@ -122,24 +123,38 @@ class BaseDevice(models.Model):
         
     @classmethod
     def _match_user_agent(cls, user_agent):
+
         device = cls.objects.filter(user_agent=user_agent).order_by('-actual_device_root')[:1]
 
         if len(device):
             return device[0]
         else:
             if settings.UA_PREFIX_MATCHING:
-                # Try more flexible matching, 1 third of the UA string
-                ds_user_agent = user_agent[:len(user_agent)//3]
-                devices = cls.objects.filter(user_agent__startswith=ds_user_agent)
-                devices = devices.order_by('-actual_device_root')[:settings.UA_PREFIX_MATCHING_LIMIT]
                 
-                if len(devices):
+                # Try more flexible matching, 1 third of the UA string
+                #ds_user_agent = user_agent[:len(user_agent)//3]
+                #devices = cls.objects.filter(user_agent__startswith=ds_user_agent)
+                #devices = devices.order_by('-actual_device_root')[:settings.UA_PREFIX_MATCHING_LIMIT]
+
+                # Try more flexible matching, from 1/3rd to 1/10th of the original UA string
+                # We break out as soon as we get a match (or matches, in which case we use Levenshtein 
+                # distance to determine which one we want to use) or if the shortened UA string is less
+                # than 5 characters long
+                devices = None
+                for factor in range(3,10):
+                    if len(user_agent)/factor <= 5: break
+                    devices = cls._match_partial_user_agent(user_agent,factor)
+                    if len(devices): break
+                    
+                if (len(devices) == 0):
+                    pass
+                else:
                     user_agent = force_unicode(user_agent)
                     best = reduce(
                         lambda x,y: Levenshtein.distance(user_agent, x.user_agent) < Levenshtein.distance(user_agent, y.user_agent) and x or y,
                         devices,
                     )
-
+                    #print (Levenshtein.distance(user_agent, best.user_agent) <= settings.UA_PREFIX_MATCHING_MAX_DISTANCE)
                     if Levenshtein.distance(user_agent, best.user_agent) <= settings.UA_PREFIX_MATCHING_MAX_DISTANCE:
                         return best
             
@@ -150,7 +165,13 @@ class BaseDevice(models.Model):
 
         raise NoMatch, "Can't find a match in currently installed WURFL table for user_agent `%s`" % user_agent
 
+    @classmethod
+    def _match_partial_user_agent(cls, user_agent, factor):
+        ds_user_agent = user_agent[:len(user_agent)//factor]
+        return cls.objects.filter(user_agent__startswith=ds_user_agent).order_by('-actual_device_root')[:settings.UA_PREFIX_MATCHING_LIMIT]
+
     def _build_full_capabilities(self):
+
         # Iteratively build capabilities list
         capabilities = [self.json_capabilities]
         parent = self

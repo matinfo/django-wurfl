@@ -2,11 +2,12 @@
 
 {% load i18n %}
 
-{% block content_title %}<h1>{% trans "Update list" %}</h1>{% endblock %}
+{% block content_title %}<h1>{% trans "Update history" %}</h1>{% endblock %}
 
 {% block object-tools %}
   <ul class="object-tools">
-    <!-- <li><a href="{% url admin:admin_wurfl_update_hybrid %}" class="viewsitelink">{% trans "Build Hybrid table" %}</a></li>
-    <li><a href="{% url admin:admin_wurfl_update_wurfl %}" class="viewsitelink">{% trans "Load WURFL" %}</a></li> -->
+    <li><a href="{% url admin:admin_wurfl_search_wurfl %}" class="viewsitelink">{% trans "User-Agent search" %}</a></li>
+    <!-- <li><a href="{% url admin:admin_wurfl_build_hybrid %}" class="viewsitelink">{% trans "Build Hybrid table" %}</a></li> -->
+    <li><a href="{% url admin:admin_wurfl_update_wurfl %}" class="viewsitelink">{% trans "Load WURFL XML file" %}</a></li>
   </ul>
 {% endblock %}

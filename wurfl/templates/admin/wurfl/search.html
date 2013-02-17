@@ -1,0 +1,78 @@
+{% extends "admin/wurfl/base.html" %}
+{% load i18n admin_static %}
+
+{% block extrahead %}
+{% url 'admin:jsi18n' as jsi18nurl %}
+<script type="text/javascript" src="{{ jsi18nurl|default:"../../../jsi18n/" }}"></script>
+{{ media }}
+<script type="text/javascript" src="{% static "admin/js/collapse.min.js" %}"></script>
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+<style type="text/css">
+input#id_user_agent { width: 65%; }
+.list  h2 { color: #333; background: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <h1>User-Agent search</h1>
+
+    {% block object-tools %}
+        <ul class="object-tools">
+            <li><a href="{% url admin:wurfl_update_changelist %}" class="viewsitelink">{% trans "Update history" %}</a></li>
+            <!-- <li><a href="{% url admin:admin_wurfl_build_hybrid %}" class="viewsitelink">{% trans "Build Hybrid table" %}</a></li> -->
+            <li><a href="{% url admin:admin_wurfl_update_wurfl %}" class="viewsitelink">{% trans "Load WURFL XML file" %}</a></li>
+        </ul>
+    {% endblock %}
+
+    <form action="" method="post">{% csrf_token %}
+        <div>
+            <fieldset class="module aligned">
+                <div class="form-row">
+                {% for field in adminform %}
+                        <div{% if field.errors %} class="errors"{% endif %}>
+                            {% if field.errors %}{{ field.errors }}{% endif %}
+                            {{ field.label_tag }}
+                            {{ field }}
+                            <p class="help">{{ field.help_text }}</p>
+                        </div>
+                {% endfor %}
+                </div>
+            </fieldset>
+            <div class="submit-row">
+                <input type="submit" value="{% trans "search" %}" class="default" />
+                {% if user_agent %}<p class="deletelink-box"><label style="width:8em">Result for:</label> <strong>{{user_agent}}</strong></p>{% endif %}
+            </div>
+        </div>
+        {% if request.POST %}
+        <div>
+            {% for device in devices %}
+            <fieldset class="module aligned collapse collapsed">
+                <h2>{{ device.user_agent }}</h2>
+                <div class="form-row">
+                    <ul>
+                        {% for group, capabilities in device.capabilities.items %}
+                            
+                            <li>{% trans "Group" %} {{ group }} :
+                                <ul>
+                                    {% for name, value in capabilities.items %}
+                                        <li>{{ name }} : {{value }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </li>            
+                            
+                        {% endfor %}
+                    </ul>
+                </div>
+            </fieldset>
+            {% empty %}
+                <ul class="messagelist">
+                    <li class="error">{% trans "Your search did not match any User Agent." %}</li>
+                </ul>
+            {% endfor %}
+        </div>
+        {% endif %}
+    
+{% endblock %}

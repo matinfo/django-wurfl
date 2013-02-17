@@ -1,4 +1,3 @@
-from wurfl.models import Device
 from wurfl.middleware import DeviceMiddleware
 
 def device(view):
