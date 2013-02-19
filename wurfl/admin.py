@@ -104,7 +104,10 @@ class UpdateAdmin(admin.ModelAdmin):
                 user_agent = form.cleaned_data['user_agent']
                 if user_agent:
                     if form.cleaned_data['test']:
-                        devices = Device.get_from_user_agent(user_agent)
+                        try:
+                            devices = Device.get_from_user_agent(user_agent)
+                        except:
+                            devices = None
                     else:
                         ds = Device.objects.filter(user_agent=user_agent)
                         ds = ds.order_by('-actual_device_root')
@@ -112,6 +115,7 @@ class UpdateAdmin(admin.ModelAdmin):
                         for d in ds:
                             d._build_full_capabilities()
                             devices.append(d)
+
                     if not hasattr(devices, '__iter__'):
                         devices = [devices]
 
