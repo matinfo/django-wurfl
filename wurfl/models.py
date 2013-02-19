@@ -140,13 +140,12 @@ class BaseDevice(models.Model):
                 # We break out as soon as we get a match (or matches, in which case we use Levenshtein 
                 # distance to determine which one we want to use) or if the shortened UA string is less
                 # than 5 characters long
-                devices = None
                 for factor in range(3,10):
                     if len(user_agent)/factor <= 5: break
                     devices = cls._match_partial_user_agent(user_agent,factor)
                     if len(devices): break
                     
-                if device != None and len(devices) == 0:
+                if device == None or len(devices) == 0:
                     pass
                 else:
                     user_agent = force_unicode(user_agent)
@@ -154,10 +153,25 @@ class BaseDevice(models.Model):
                         lambda x,y: Levenshtein.distance(user_agent, x.user_agent) < Levenshtein.distance(user_agent, y.user_agent) and x or y,
                         devices,
                     )
-                    #print (Levenshtein.distance(user_agent, best.user_agent) <= settings.UA_PREFIX_MATCHING_MAX_DISTANCE)
                     if Levenshtein.distance(user_agent, best.user_agent) <= settings.UA_PREFIX_MATCHING_MAX_DISTANCE:
                         return best
-            
+
+            if settings.UA_INTERNAL_MATCHING:
+                # Try more flexible matching, by removing first word and last word
+                ds_user_agent = ' '.join(user_agent.split()[1:-1])
+                devices = cls.objects.filter(user_agent__icontains=ds_user_agent).order_by('-actual_device_root')[:settings.UA_INTERNAL_MATCHING_LIMIT]
+
+                if device == None or len(devices) == 0:
+                    pass
+                else:
+                    user_agent = force_unicode(user_agent)
+                    best = reduce(
+                        lambda x,y: Levenshtein.distance(user_agent, x.user_agent) < Levenshtein.distance(user_agent, y.user_agent) and x or y,
+                        devices,
+                    )
+                    if Levenshtein.distance(user_agent, best.user_agent) <= settings.UA_INTERNAL_MATCHING_MAX_DISTANCE:
+                        return best
+
             if settings.UA_GENERIC_FALLBACK:
                 # Try to match with generic properties
                 # :TODO:

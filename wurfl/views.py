@@ -1,8 +1,4 @@
-import operator
-from django.db.models import Q
-from django.shortcuts import get_object_or_404
-from django.views.generic.detail import DetailView
-from django.views.generic.list import ListView
+
 from django.contrib import admin
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render_to_response
@@ -10,8 +6,7 @@ from django.template import RequestContext
 
 from wurfl.decorators import device
 from wurfl.admin import UpdateAdmin
-from wurfl.models import Update, Device
-from wurfl.forms import WurflSearchForm
+
 
 @device
 def test(request):

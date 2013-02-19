@@ -53,19 +53,7 @@ class Command(BaseCommand):
 
     def get_device_name(self, device):
 
-        marketing_name = device.get_capability('marketing_name'),
-        model_extra_info = device.get_capability('model_extra_info')
-
-        if marketing_name and model_extra_info:
-            extra = '%s %s' % (marketing_name, model_extra_info)
-        elif marketing_name:
-            extra = '%s' % marketing_name
-        elif model_extra_info:
-            extra = '%s' % model_extra_info
-        else:
-            extra = ''
-
         return '%s %s %s' % (
             device.get_capability('brand_name'), 
             device.get_capability('model_name'), 
-            extra)
+            device.get_capability('model_extra_info'))
