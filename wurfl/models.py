@@ -145,7 +145,7 @@ class BaseDevice(models.Model):
                     devices = cls._match_partial_user_agent(user_agent,factor)
                     if len(devices): break
                     
-                if device == None or len(devices) == 0:
+                if devices == None or len(devices) == 0:
                     pass
                 else:
                     user_agent = force_unicode(user_agent)
