@@ -130,7 +130,7 @@ class BaseDevice(models.Model):
             return device[0]
         else:
             if settings.UA_PREFIX_MATCHING:
-                
+                devices = None 
                 # Try more flexible matching, 1 third of the UA string
                 #ds_user_agent = user_agent[:len(user_agent)//3]
                 #devices = cls.objects.filter(user_agent__startswith=ds_user_agent)
@@ -161,7 +161,7 @@ class BaseDevice(models.Model):
                 ds_user_agent = ' '.join(user_agent.split()[1:-1])
                 devices = cls.objects.filter(user_agent__icontains=ds_user_agent).order_by('-actual_device_root')[:settings.UA_INTERNAL_MATCHING_LIMIT]
 
-                if device == None or len(devices) == 0:
+                if devices == None or len(devices) == 0:
                     pass
                 else:
                     user_agent = force_unicode(user_agent)
